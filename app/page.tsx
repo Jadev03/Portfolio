@@ -247,6 +247,13 @@ export default function Home() {
             </div>
 
             <div className="space-y-1.5">
+              <p className="font-semibold text-slate-100">
+                Cloud Technologies
+              </p>
+              <p className="text-slate-300">AWS</p>
+            </div>
+
+            <div className="space-y-1.5">
               <p className="font-semibold text-slate-100">Version Control</p>
               <p className="text-slate-300">Git, GitHub</p>
             </div>
