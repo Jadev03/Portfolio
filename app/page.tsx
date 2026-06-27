@@ -1,195 +1,513 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const CV_PATH = "/Thabendra.pdf";
+
+const navItems = [
+  { label: "Home", href: "#home" },
+  { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
+  { label: "Education", href: "#education" },
+  { label: "Contact", href: "#contact" },
+];
+
 export default function Home() {
+  const [activeSection, setActiveSection] = useState("home");
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [formStatus, setFormStatus] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    const sectionIds = navItems.map((item) => item.href.replace("#", ""));
+
+    const updateActiveSection = () => {
+      const sections = sectionIds
+        .map((id) => document.getElementById(id))
+        .filter((section): section is HTMLElement => section !== null);
+
+      if (sections.length === 0) {
+        return;
+      }
+
+      const offsetY = window.scrollY + 120;
+      let current = sections[0].id;
+
+      for (const section of sections) {
+        if (offsetY >= section.offsetTop) {
+          current = section.id;
+        }
+      }
+
+      setActiveSection(current);
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
+
+    return () => {
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
+  }, []);
+
+  const handleCvDownload = () => {
+    const confirmed = window.confirm("Do you want to download my CV?");
+    if (!confirmed) {
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = CV_PATH;
+    link.download = "Thabendra.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleContactSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    setIsSending(true);
+    setFormStatus("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contactForm),
+      });
+
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        setFormStatus(data.error || "Failed to send message. Please try again.");
+        return;
+      }
+
+      setFormStatus("");
+      setContactForm({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch {
+      setFormStatus("Failed to send message. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25)_0,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(129,140,248,0.25)_0,_transparent_55%)]" />
+    <div className="min-h-screen bg-white text-slate-900">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(14,165,233,0.08),transparent_35%),radial-gradient(circle_at_85%_12%,rgba(249,115,22,0.06),transparent_35%)]" />
 
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-12 px-6 py-10 md:py-16">
-        <header className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-5">
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-sky-300 ring-1 ring-sky-500/40 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]" />
-              Computer Science & Engineering Undergraduate
-            </span>
+      <header className="sticky top-0 z-20 w-full border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="mx-auto max-w-6xl px-5 py-3 sm:px-7 md:px-10">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm font-semibold tracking-wide text-slate-900">
+              Sathiendra Thabendra
+            </p>
 
-            <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
-                Hi, I&apos;m{" "}
-                <span className="bg-gradient-to-r from-sky-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
-                  Sathiendra Thabendra
-                </span>
+            <nav className="flex flex-wrap items-center gap-2">
+              {navItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  aria-current={activeSection === item.href.replace("#", "") ? "page" : undefined}
+                  className={`rounded-full px-3 py-1.5 text-sm transition ${
+                    activeSection === item.href.replace("#", "")
+                      ? "bg-sky-100 text-sky-800"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-sky-700"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              ))}
+
+              <button
+                type="button"
+                onClick={handleCvDownload}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-sky-500"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+                  <path d="M14 2v5h5" />
+                  <path d="M12 11v6" />
+                  <path d="m9.5 14.5 2.5 2.5 2.5-2.5" />
+                </svg>
+                CV
+              </button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-7 md:px-10">
+
+        <section
+          id="home"
+          className="mb-12 overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+          <div className="grid items-start gap-8 md:grid-cols-[1.4fr_1fr] md:gap-10">
+            <div className="space-y-6">
+              <h1 className="max-w-3xl text-3xl font-bold leading-tight text-slate-900 sm:text-4xl md:text-5xl">
+                Sathiendra Thabendra
               </h1>
-              <p className="max-w-xl text-sm text-slate-300 sm:text-base">
-                I&apos;m an undergraduate at the{" "}
-                <span className="font-semibold text-sky-300">
-                  University of Moratuwa
-                </span>{" "}
-                passionate about building elegant, high-impact software
-                solutions. I love combining solid engineering fundamentals with
-                clean, modern UI design.
+
+              <div className="space-y-2 text-slate-700">
+                <p className="text-lg font-medium text-slate-900">
+                  Software Engineer
+                </p>
+                <p className="text-xs text-slate-900 sm:text-sm">
+                  Department of Computer Science and Engineering
+                </p>
+                <p className="text-xs text-slate-900 sm:text-sm">
+                  University of Moratuwa, Colombo, Sri Lanka
+                </p>
+              </div>
+
+              <p className="max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+                I am a Software Engineer passionate about designing and
+                developing scalable SaaS platforms, web applications, and
+                mobile applications. I applying Software Development Life Cycle
+                (SDLC) best practices, cloud technologies, DevOps principles,
+                and CI/CD to build secure, reliable, and production ready
+                software that delivers lasting value.
+              </p>
+
+            </div>
+
+            <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <img
+                src="/project-images/Portfolio%20image.png"
+                alt="Sathiendra Thabendra profile"
+                className="h-64 w-full rounded-2xl bg-slate-100 object-contain object-top scale-105"
+              />
+
+              <div className="mt-5 space-y-3 text-sm">
+                <p className="text-base font-semibold text-slate-900">
+                  Sathiendra Thabendra
+                </p>
+                <ul className="space-y-3 text-slate-800">
+                  <li className="flex items-center gap-3">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-sky-300 bg-sky-200 text-sky-900">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 6h16v12H4z" />
+                        <path d="m4 7 8 6 8-6" />
+                      </svg>
+                    </span>
+                    <a
+                      href="mailto:sathiendrathabendra@gmail.com"
+                      className="text-slate-900 hover:text-sky-700"
+                    >
+                      sathiendrathabendra@gmail.com
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-emerald-300 bg-emerald-200 text-emerald-900">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.1 9.7a16 16 0 0 0 6.2 6.2l1.25-1.24a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                    </span>
+                    <span>+94 76 241 2023</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-orange-300 bg-orange-200 text-orange-900">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 21s-7-4.35-7-11a7 7 0 1 1 14 0c0 6.65-7 11-7 11z" />
+                        <circle cx="12" cy="10" r="2.5" />
+                      </svg>
+                    </span>
+                    <span>Jaffna, Sri Lanka</span>
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section
+          id="experience"
+          className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">Experience</h2>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-lg font-semibold text-slate-900">
+                  Software Engineer Intern
+                </p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-slate-600">
+                  Liziris
+                </p>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">
+                Jan 2025 - Jul 2025
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="#projects"
-                className="group inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_18px_60px_rgba(56,189,248,0.45)] transition hover:bg-sky-400"
-              >
-                View projects
-                <span className="transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </a>
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-900/40 px-5 py-2.5 text-sm font-medium text-slate-100 backdrop-blur transition hover:border-sky-400/80 hover:text-sky-100"
-              >
-                Contact me
-              </a>
-            </div>
-          </div>
+            <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-slate-700 marker:text-sky-600">
+              <li>
+                Developed backend APIs and full-stack features for production
+                web platforms, including authentication, authorization, cart,
+                ordering, and payment workflows.
+              </li>
+              <li>
+                Improved communication modules by implementing pagination and
+                fixing message retrieval reliability issues between users and
+                administrators.
+              </li>
+              <li>
+                Resolved search and routing issues and optimized paginated data
+                listings to improve discoverability and application performance.
+              </li>
+              <li>
+                Integrated secure login flows and interactive coding features,
+                then optimized execution requests with timeout handling to
+                improve responsiveness.
+              </li>
+            </ul>
 
-          <aside className="w-full max-w-sm rounded-3xl border border-slate-800/60 bg-slate-900/60 p-5 shadow-[0_18px_80px_rgba(15,23,42,0.9)] backdrop-blur md:p-6">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-slate-100">
-                Quick Info
-              </h2>
-              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-300">
-                Open to opportunities
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="rounded-full border border-sky-300 bg-sky-200 px-3 py-1 text-xs font-semibold text-sky-900">
+                Node.js
+              </span>
+              <span className="rounded-full border border-cyan-300 bg-cyan-200 px-3 py-1 text-xs font-semibold text-cyan-900">
+                React.js
+              </span>
+              <span className="rounded-full border border-blue-300 bg-blue-200 px-3 py-1 text-xs font-semibold text-blue-900">
+                Next.js
+              </span>
+              <span className="rounded-full border border-indigo-300 bg-indigo-200 px-3 py-1 text-xs font-semibold text-indigo-900">
+                Express.js
+              </span>
+              <span className="rounded-full border border-emerald-300 bg-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900">
+                REST APIs
+              </span>
+              <span className="rounded-full border border-orange-300 bg-orange-200 px-3 py-1 text-xs font-semibold text-orange-900">
+                PostgreSQL
               </span>
             </div>
-
-            <dl className="space-y-3 text-sm">
-              <div className="flex gap-3">
-                <dt className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Name
-                </dt>
-                <dd className="text-slate-100">
-                  Sathiendra Thabendra
-                </dd>
-              </div>
-              <div className="flex gap-3">
-                <dt className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Phone
-                </dt>
-                <dd className="text-slate-100">+94 76 241 2023</dd>
-              </div>
-              <div className="flex gap-3">
-                <dt className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Email
-                </dt>
-                <dd className="text-slate-100">
-                  <a
-                    href="mailto:sathiendra.21@cse.mrt.ac.lk"
-                    className="underline-offset-2 hover:underline"
-                  >
-                    sathiendra.21@cse.mrt.ac.lk
-                  </a>
-                </dd>
-              </div>
-              <div className="flex gap-3">
-                <dt className="w-20 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Location
-                </dt>
-                <dd className="text-slate-100">
-                  No 82/1, St. Benedict&apos;s Road, Jaffna
-                </dd>
-              </div>
-            </dl>
-
-            <div className="mt-5 h-px bg-gradient-to-r from-transparent via-slate-700/80 to-transparent" />
-
-            <div className="mt-5 flex flex-wrap gap-3 text-xs">
-              <a
-                href="https://linkedin.com/in/sathiendra-thabendra-0467682b2"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-600/70 bg-slate-900/40 px-3 py-1.5 font-medium text-slate-100 transition hover:border-sky-400/90 hover:text-sky-100"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-                LinkedIn
-              </a>
-              <a
-                href="https://github.com/Jadev03"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-600/70 bg-slate-900/40 px-3 py-1.5 font-medium text-slate-100 transition hover:border-sky-400/90 hover:text-sky-100"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                GitHub
-              </a>
-            </div>
-          </aside>
-        </header>
+          </div>
+        </section>
 
         <section
-          id="about"
-          className="grid gap-8 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)]"
+          id="projects"
+          className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
         >
-          <div className="space-y-4 rounded-3xl border border-slate-800/70 bg-slate-900/50 p-5 sm:p-6 backdrop-blur">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-              About
-            </h2>
-            <p className="text-sm text-slate-200 sm:text-[15px] leading-relaxed">
-              I&apos;m currently pursuing my{" "}
-              <span className="font-semibold text-sky-300">
-                B.Sc. Engineering (Hons) in Computer Science and Engineering
-              </span>{" "}
-              at the University of Moratuwa. I enjoy solving complex problems,
-              exploring system-level design, and building full-stack
-              applications that feel polished and intuitive.
-            </p>
-            <p className="text-sm text-slate-300 sm:text-[15px] leading-relaxed">
-              My academic background includes strong performance in mathematics
-              and physical sciences, and I&apos;m continuously sharpening my
-              skills in areas like algorithms, backend development, and modern
-              web technologies.
-            </p>
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">Projects</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-blue-900">
+                Full Stack
+              </h3>
+              <div className="flex flex-wrap justify-center gap-4">
+                <article className="w-full rounded-2xl border border-slate-200 bg-white p-5 md:w-[calc(50%-0.5rem)]">
+                  <img
+                    src="/project-images/Sparta%20cover.png"
+                    alt="Sparta Education Platform visual"
+                    className="mb-4 h-44 w-full rounded-xl object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-base font-semibold text-slate-900">
+                      Sparta Education Platform
+                    </h4>
+                    <a
+                      href="https://github.com/Jadev03/Sparta"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                      aria-label="Open Sparta repository"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                      </svg>
+                    </a>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">
+                    An educational streaming project centered on
+                    scalable video delivery, combining secure access control,
+                    asynchronous media processing, and reliable
+                    inter service communication.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-cyan-300 bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+                      React.js
+                    </span>
+                    <span className="rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      Spring Boot
+                    </span>
+                    <span className="rounded-full border border-green-300 bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                      MongoDB
+                    </span>
+                    <span className="rounded-full border border-orange-300 bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
+                      AWS S3
+                    </span>
+                    <span className="rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                      RabbitMQ
+                    </span>
+                    <span className="rounded-full border border-violet-300 bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">
+                      gRPC
+                    </span>
+                    <span className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800">
+                      Redis
+                    </span>
+                  </div>
+                </article>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-200 ring-1 ring-sky-500/40">
-                Problem Solving
-              </span>
-              <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-200 ring-1 ring-indigo-500/40">
-                Full-stack Development
-              </span>
-              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-200 ring-1 ring-emerald-500/40">
-                Clean UI/UX
-              </span>
+                <article className="w-full rounded-2xl border border-slate-200 bg-white p-5 md:w-[calc(50%-0.5rem)]">
+                  <img
+                    src="/project-images/medical%20care%20%20cover.png"
+                    alt="Medical Care System visual"
+                    className="mb-4 h-44 w-full rounded-xl object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-base font-semibold text-slate-900">
+                      Medical Care System
+                    </h4>
+                    <a
+                      href="https://github.com/Medical-Care-Management-System"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                      aria-label="Open Medical Care Management System repository"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                      </svg>
+                    </a>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">
+                    A healthcare project centered on digital care
+                    coordination, combining appointment handling, queue
+                    management, role based access, and structured medical
+                    workflows.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-cyan-300 bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+                      React.js
+                    </span>
+                    <span className="rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                      Node.js
+                    </span>
+                    <span className="rounded-full border border-indigo-300 bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800">
+                      Express.js
+                    </span>
+                    <span className="rounded-full border border-orange-300 bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800">
+                      PostgreSQL
+                    </span>
+                    <span className="rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                      REST APIs
+                    </span>
+                  </div>
+                </article>
+
+                <article className="w-full rounded-2xl border border-slate-200 bg-white p-5 md:w-[calc(50%-0.5rem)]">
+                  <img
+                    src="/project-images/HR%20management%20system%20cover.png"
+                    alt="HR Management System visual"
+                    className="mb-4 h-44 w-full rounded-xl object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-base font-semibold text-slate-900">
+                      HR Management System
+                    </h4>
+                    <a
+                      href="https://github.com/Jadev03/HR-Management-System"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                      aria-label="Open HR Management System repository"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                      </svg>
+                    </a>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">
+                    An HR project centered on workforce operations,
+                    combining employee records, profile workflows, leave
+                    management, and integrated backend services on a relational
+                    data model.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-cyan-300 bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+                      React.js
+                    </span>
+                    <span className="rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                      Node.js
+                    </span>
+                    <span className="rounded-full border border-indigo-300 bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800">
+                      Express.js
+                    </span>
+                    <span className="rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
+                      MySQL
+                    </span>
+                  </div>
+                </article>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="rounded-3xl border border-slate-800/70 bg-slate-900/60 p-5 sm:p-6 backdrop-blur">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-                Education
-              </h2>
-              <div className="mt-4 space-y-4 text-sm">
-                <div>
-                  <p className="font-semibold text-slate-100">
-                    University of Moratuwa
+            <div>
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-blue-900">
+                Research and Development
+              </h3>
+              <div className="flex justify-center">
+                <article className="w-full rounded-2xl border border-slate-200 bg-white p-5 md:w-[calc(50%-0.5rem)]">
+                  <img
+                    src="/project-images/ASR%20cover%20image.png"
+                    alt="ASR Tamil-English research visual"
+                    className="mb-4 h-44 w-full rounded-xl object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-base font-semibold text-slate-900">
+                      Enhancing ASR for Tamil-English Code Switching
+                    </h4>
+                    <a
+                      href="https://github.com/Jadev03/Enhanced-ASR-for-Tamil-English-code-switching-with-Morphological-suffix"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                      aria-label="Open ASR research repository"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                      </svg>
+                    </a>
+                  </div>
+                  <p className="mt-2 text-sm text-slate-700">
+                    A speech recognition research project centered on Tamil-English
+                    code-switched transcription, combining model fine tuning and
+                    multi stage correction pipelines to improve mixed-language
+                    recognition quality.
                   </p>
-                  <p className="text-slate-300">
-                    B.Sc. Engineering (Hons) in Computer Science and
-                    Engineering
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Undergraduate &mdash; Department of Computer Science and
-                    Engineering
-                  </p>
-                </div>
-                <div className="h-px bg-slate-800/90" />
-                <div>
-                  <p className="font-semibold text-slate-100">
-                    St. John&apos;s College, Jaffna
-                  </p>
-                  <ul className="mt-1 space-y-1 text-xs text-slate-300">
-                    <li>GCE Ordinary Level: 7A, 1B, 1C (2017)</li>
-                    <li>
-                      GCE Advanced Level: 3A (Physical Science Stream) &mdash;
-                      District Rank 28 (2020)
-                    </li>
-                  </ul>
-                </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-violet-300 bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">
+                      Whisper
+                    </span>
+                    <span className="rounded-full border border-fuchsia-300 bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-800">
+                      LoRA
+                    </span>
+                    <span className="rounded-full border border-purple-300 bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
+                      XLM-R
+                    </span>
+                    <span className="rounded-full border border-pink-300 bg-pink-100 px-3 py-1 text-xs font-semibold text-pink-800">
+                      mT5
+                    </span>
+                  </div>
+                </article>
               </div>
             </div>
           </div>
@@ -197,304 +515,266 @@ export default function Home() {
 
         <section
           id="skills"
-          className="grid gap-6 rounded-3xl border border-slate-800/80 bg-slate-950/70 p-5 text-sm backdrop-blur sm:p-6 md:grid-cols-2"
+          className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
         >
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Skills
-            </h2>
-            <p className="text-xs text-slate-300 sm:text-[13px]">
-              A snapshot of the tools and technologies I&apos;m most comfortable
-              with, across programming, mobile, web, and data.
-            </p>
-          </div>
-
-          <div className="grid gap-3 text-xs sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">Skills</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
                 Programming Languages
-              </p>
-              <p className="text-slate-300">
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
                 Java, Python, JavaScript, C++, Dart
               </p>
-            </div>
+            </article>
 
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">
-                Mobile Technologies
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
+                Frontend Development
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                React.js, Next.js, HTML, CSS, Bootstrap, Flutter
               </p>
-              <p className="text-slate-300">Flutter, React Native</p>
-            </div>
+            </article>
 
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">
-                Front-End Technologies
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
+                Backend Development
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                Node.js, Express.js, Spring Boot, REST APIs
               </p>
-              <p className="text-slate-300">React</p>
-            </div>
+            </article>
 
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">Web Development</p>
-              <p className="text-slate-300">
-                HTML, CSS, Bootstrap, Node.js, Express.js, Next.js, Nest.js,
-                Spring Boot
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
+                Databases
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                PostgreSQL, MySQL, MongoDB, Redis
               </p>
-            </div>
+            </article>
 
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">Database</p>
-              <p className="text-slate-300">MySQL, PostgreSQL</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">
-                Cloud Technologies
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
+                Cloud and DevOps
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                Docker, AWS S3, RabbitMQ, Git, GitHub, CI/CD, GitHub Actions
               </p>
-              <p className="text-slate-300">AWS</p>
-            </div>
+            </article>
 
-            <div className="space-y-1.5">
-              <p className="font-semibold text-slate-100">Version Control</p>
-              <p className="text-slate-300">Git, GitHub</p>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-900">
+                Professional Skills
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                Problem Solving, Communication, Team Collaboration, Adaptability
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          id="education"
+          className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">Education</h2>
+          <div className="space-y-4 text-sm text-slate-700">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-base font-semibold text-slate-900">
+                University of Moratuwa
+              </p>
+              <p>B.Sc. Engineering (Hons) in Computer Science and Engineering</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-base font-semibold text-slate-900">
+                St. John&apos;s College, Jaffna
+              </p>
+              <p>GCE A/L Physical Science Stream</p>
             </div>
           </div>
         </section>
 
         <section
-          id="experience"
-          className="space-y-4 rounded-3xl border border-slate-800/80 bg-slate-950/60 p-5 text-sm backdrop-blur sm:p-6"
+          id="certification"
+          className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
         >
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-                Experience
-              </h2>
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-sky-300">
-                  Jan 2025 – Jul 2025
-                </p>
-                <p className="text-base font-semibold text-slate-50">
-                  Software Engineering Intern &middot; Liziris
-                </p>
-              </div>
-            </div>
-            <div className="mt-2 flex items-start gap-3 text-xs md:mt-0">
-              <div className="mt-1 h-10 w-px bg-gradient-to-b from-sky-400/70 via-slate-600/60 to-transparent md:block" />
-              <div className="space-y-2 text-slate-200">
-                <ul className="space-y-1.5">
-                  <li className="leading-relaxed">
-                    Full-stack development of a loyalty food ordering
-                    application, including database design and
-                    backend/frontend implementation.
-                  </li>
-                  <li className="leading-relaxed">
-                    Worked on <span className="font-medium">Gidz Uni Path</span>, a
-                    university pathway portal, handling full-stack web
-                    development, client communication, and long-term
-                    maintenance.
-                  </li>
-                  <li className="leading-relaxed">
-                    Built the MVP of <span className="font-medium">CodeDemo</span>,
-                    implementing a real-time code editor, compiler integration,
-                    and authentication for seamless interactive coding.
-                  </li>
-                  <li className="leading-relaxed">
-                    Maintained and enhanced the <span className="font-medium">EziChoice</span>{" "}
-                    e-commerce platform (web and mobile), developing new
-                    features and fixing production issues across both web and
-                    Android/iOS applications.
-                  </li>
-                </ul>
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">
+            Certifications
+          </h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Certification
+              </p>
+              <h3 className="mt-2 text-base font-semibold text-slate-900">Python Basic</h3>
+              <a
+                href="https://www.hackerrank.com/certificates/4edea6fe2390"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-5 inline-flex text-sm font-medium text-sky-300 transition hover:text-sky-200"
+              >
+                Open Credential ↗
+              </a>
+            </article>
 
-                <p className="pt-1 text-[11px] text-slate-300">
-                  Technologies: JavaScript, TypeScript, React, Next.js, Flutter,
-                  Supabase, PostgreSQL, Docker
-                </p>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Certification
+              </p>
+              <h3 className="mt-2 text-base font-semibold text-slate-900">Java Basic</h3>
+              <a
+                href="https://www.hackerrank.com/certificates/255be3d3ead4"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-5 inline-flex text-sm font-medium text-sky-300 transition hover:text-sky-200"
+              >
+                Open Credential ↗
+              </a>
+            </article>
 
-                <a
-                  href="https://drive.google.com/file/d/16yX3PT8ZONlEfv_1ADi-1mmLt6Ochk6h/view"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-3 py-1.5 text-[11px] font-medium text-sky-200 ring-1 ring-sky-500/40 transition hover:bg-sky-500/20 hover:text-sky-50"
-                >
-                  View Service Letter
-                  <span className="text-[10px]">↗</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="projects" className="space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-              Featured Projects
-            </h2>
-            <a
-              href="https://github.com/Jadev03"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium text-sky-300 underline-offset-2 hover:text-sky-200 hover:underline"
-            >
-              View all on GitHub
-            </a>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="group rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm shadow-[0_18px_70px_rgba(15,23,42,0.8)] transition hover:-translate-y-1 hover:border-sky-400/80 hover:bg-slate-900/80">
-              <div className="flex items-start gap-3">
-                <div>
-                  <h3 className="font-semibold text-slate-50">
-                    Enhancing ASR for Tamil–English Code-Switching
-                  </h3>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    Research &amp; Development Project &middot; Jul 2025 – Present
-                  </p>
-                  <p className="mt-2 text-xs text-slate-300">
-                    Conducting research to improve ASR for Tamil–English
-                    code-switching speech, including literature review, data
-                    collection from multiple real-world sources, and preparing
-                    annotated datasets and evaluation plans (e.g., WER).
-                  </p>
-                </div>
-              </div>
-              <p className="mt-3 text-[11px] text-slate-400">
-                Internal research project (no public repository yet).
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Certification
               </p>
-            </div>
-
-            <a
-              href="https://github.com/SivaNiroshan/sparta_backend"
-              target="_blank"
-              rel="noreferrer"
-              className="group rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm shadow-[0_18px_70px_rgba(15,23,42,0.8)] transition hover:-translate-y-1 hover:border-sky-400/80 hover:bg-slate-900/80"
-            >
-              <div className="flex items-start gap-3">
-                <div>
-                  <h3 className="font-semibold text-slate-50">
-                    Sparta Video Storage &amp; Streaming Education Platform
-                  </h3>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    Personal Project &middot; Oct 2025 – Present
-                  </p>
-                  <p className="mt-2 text-xs text-slate-300">
-                    Microservices-based educational video streaming platform
-                    with secure JWT authentication, resumable uploads, and
-                    scalable processing pipelines for large video content.
-                  </p>
-                </div>
-              </div>
-              <p className="mt-2 text-[11px] text-slate-300">
-                Tech Stack: React.js, Nest.js, Spring Boot, PostgreSQL, MongoDB,
-                AWS S3, RabbitMQ
-              </p>
-              <p className="mt-2 inline-flex items-center text-xs font-medium text-sky-300">
-                View backend on GitHub
-                <span className="ml-1 transition-transform group-hover:translate-x-0.5">
-                  ↗
-                </span>
-              </p>
-            </a>
-
-            <a
-              href="https://github.com/Medical-Care-Management-System"
-              target="_blank"
-              rel="noreferrer"
-              className="group rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm shadow-[0_18px_70px_rgba(15,23,42,0.8)] transition hover:-translate-y-1 hover:border-sky-400/80 hover:bg-slate-900/80"
-            >
-              <div className="flex items-start gap-3">
-                <div>
-                  <h3 className="font-semibold text-slate-50">
-                    Real-Time Medical Care Management System
-                  </h3>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    Semester 5 Project &middot; Jul 2024 – Nov 2024
-                  </p>
-                  <p className="mt-2 text-xs text-slate-300">
-                    Real-time medical care management platform connecting
-                    patients, doctors, and administrators with appointment
-                    booking, feedback, queue management, and role-based
-                    dashboards.
-                  </p>
-                </div>
-              </div>
-              <p className="mt-2 text-[11px] text-slate-300">
-                Tech Stack: Flutter, Django, Django REST Framework, PostgreSQL
-              </p>
-              <p className="mt-2 inline-flex items-center text-xs font-medium text-sky-300">
-                View organization on GitHub
-                <span className="ml-1 transition-transform group-hover:translate-x-0.5">
-                  ↗
-                </span>
-              </p>
-            </a>
-
-            <a
-              href="https://github.com/Jadev03/HR-Management-System"
-              target="_blank"
-              rel="noreferrer"
-              className="group rounded-3xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm shadow-[0_18px_70px_rgba(15,23,42,0.8)] transition hover:-translate-y-1 hover:border-sky-400/80 hover:bg-slate-900/80"
-            >
-              <div className="flex items-start gap-3">
-                <div>
-                  <h3 className="font-semibold text-slate-50">
-                    HR Management System – Jupiter Apparels
-                  </h3>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    Semester 3 Project &middot; Jul 2023 – Nov 2023
-                  </p>
-                  <p className="mt-2 text-xs text-slate-300">
-                    Web-based HR management system with employee and leave
-                    management, front-end features for Level 1 employees, and
-                    robust backend APIs with a carefully designed MySQL schema.
-                  </p>
-                </div>
-              </div>
-              <p className="mt-2 text-[11px] text-slate-300">
-                Tech Stack: React.js, Node.js, Express.js, MySQL
-              </p>
-              <p className="mt-2 inline-flex items-center text-xs font-medium text-sky-300">
-                View on GitHub
-                <span className="ml-1 transition-transform group-hover:translate-x-0.5">
-                  ↗
-                </span>
-              </p>
-            </a>
+              <h3 className="mt-2 text-base font-semibold text-slate-900">
+                AWS Cloud Practitioner Essentials
+              </h3>
+              <a
+                href="https://drive.google.com/file/d/19WjlgvlyCJSlaFRnP-m5X-xK6grFNrmg/view"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-5 inline-flex text-sm font-medium text-sky-300 transition hover:text-sky-200"
+              >
+                Open Credential ↗
+              </a>
+            </article>
           </div>
         </section>
 
         <section
           id="contact"
-          className="mt-2 rounded-3xl border border-slate-800/80 bg-slate-950/60 p-5 text-sm backdrop-blur sm:p-6"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
         >
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-                Contact
-              </h2>
-              <p className="mt-2 max-w-xl text-xs text-slate-300 sm:text-[13px]">
-                Whether it&apos;s an internship, research collaboration, or a
-                software project, I&apos;d be happy to connect and explore how
-                we can work together.
+          <h2 className="mb-5 text-2xl font-semibold text-slate-900">Contact</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="mb-4 text-sm text-slate-700">
+                Feel free to reach out through any channel below.
               </p>
+              <ul className="space-y-4 text-sm text-slate-800">
+                <li className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-300 bg-sky-200 text-sky-900">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 6h16v12H4z" />
+                      <path d="m4 7 8 6 8-6" />
+                    </svg>
+                  </span>
+                  <a href="mailto:sathiendrathabendra@gmail.com" className="hover:text-sky-300">
+                    sathiendrathabendra@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-300 bg-emerald-200 text-emerald-900">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.1 9.7a16 16 0 0 0 6.2 6.2l1.25-1.24a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                  </span>
+                  <span>+94 76 241 2023</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300 bg-cyan-200 text-cyan-900">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.98 0h4.79v2.2h.07c.67-1.27 2.3-2.61 4.73-2.61 5.06 0 6 3.33 6 7.66V24h-5v-7.45c0-1.78-.03-4.07-2.48-4.07-2.48 0-2.86 1.94-2.86 3.94V24h-5V8z" />
+                    </svg>
+                  </span>
+                  <a
+                    href="https://linkedin.com/in/sathiendra-thabendra-0467682b2"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="hover:text-sky-300"
+                  >
+                    linkedin.com/in/sathiendra-thabendra-0467682b2
+                  </a>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-violet-300 bg-violet-200 text-violet-900">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                    </svg>
+                  </span>
+                  <a
+                    href="https://github.com/Jadev03"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="hover:text-sky-300"
+                  >
+                    github.com/Jadev03
+                  </a>
+                </li>
+              </ul>
             </div>
-            <div className="space-y-1 text-xs text-slate-200">
-              <p>
-                Email:{" "}
-                <a
-                  href="mailto:sathiendra.21@cse.mrt.ac.lk"
-                  className="font-medium text-sky-300 underline-offset-2 hover:underline"
+
+            <form
+              onSubmit={handleContactSubmit}
+              className="rounded-2xl border border-slate-200 bg-white p-5"
+            >
+              <h3 className="mb-4 text-lg font-semibold text-slate-900">Send Message</h3>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  required
+                  value={contactForm.name}
+                  onChange={(e) =>
+                    setContactForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  required
+                  value={contactForm.email}
+                  onChange={(e) =>
+                    setContactForm((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Subject"
+                  value={contactForm.subject}
+                  onChange={(e) =>
+                    setContactForm((prev) => ({ ...prev, subject: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+                <textarea
+                  placeholder="Message"
+                  rows={5}
+                  required
+                  value={contactForm.message}
+                  onChange={(e) =>
+                    setContactForm((prev) => ({ ...prev, message: e.target.value }))
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={isSending}
+                  className="rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  sathiendra.21@cse.mrt.ac.lk
-                </a>
-              </p>
-              <p>Phone: +94 76 241 2023</p>
-            </div>
+                  {isSending ? "Sending..." : "Send Message"}
+                </button>
+                {formStatus ? (
+                  <p className="text-xs text-rose-300">{formStatus}</p>
+                ) : null}
+              </div>
+            </form>
           </div>
         </section>
-
-        <footer className="pb-4 pt-2 text-center text-[11px] text-slate-500">
-          © 2025 Sathiendra Thabendra. Built with Next.js.
-        </footer>
       </main>
     </div>
   );
