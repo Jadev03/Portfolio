@@ -440,7 +440,8 @@ export default function Home() {
                     An HR project centered on workforce operations,
                     combining employee records, profile workflows, leave
                     management, and integrated backend services on a relational
-                    data model.
+                    data model, with Docker-based containerization and CI/CD
+                    automation for consistent delivery.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="rounded-full border border-cyan-300 bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
@@ -454,6 +455,12 @@ export default function Home() {
                     </span>
                     <span className="rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
                       MySQL
+                    </span>
+                    <span className="rounded-full border border-rose-300 bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800">
+                      Docker
+                    </span>
+                    <span className="rounded-full border border-teal-300 bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800">
+                      CI/CD
                     </span>
                   </div>
                 </article>
@@ -643,6 +650,23 @@ export default function Home() {
               </h3>
               <a
                 href="https://drive.google.com/file/d/19WjlgvlyCJSlaFRnP-m5X-xK6grFNrmg/view"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-5 inline-flex text-sm font-medium text-sky-300 transition hover:text-sky-200"
+              >
+                Open Credential ↗
+              </a>
+            </article>
+
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Certification
+              </p>
+              <h3 className="mt-2 text-base font-semibold text-slate-900">
+                Generative AI for Software Development
+              </h3>
+              <a
+                href="https://drive.google.com/file/d/1E0-Kc4s8M88_kRrQAmXtY3A4NeptpbTa/view?usp=sharing"
                 target="_blank"
                 rel="noreferrer noopener"
                 className="mt-5 inline-flex text-sm font-medium text-sky-300 transition hover:text-sky-200"
