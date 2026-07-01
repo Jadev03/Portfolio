@@ -424,23 +424,38 @@ export default function Home() {
                     <h4 className="text-base font-semibold text-slate-900">
                       HR Management System
                     </h4>
-                    <a
-                      href="https://github.com/Jadev03/HR-Management-System"
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
-                      aria-label="Open HR Management System repository"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
-                      </svg>
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href="https://hr-management-system.sathiendrathabendra.workers.dev/"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                        aria-label="Open HR Management System deployed site"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                          <path d="M14 3h7v7" />
+                          <path d="M10 14 21 3" />
+                          <path d="M21 14v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h6" />
+                        </svg>
+                      </a>
+                      <a
+                        href="https://github.com/Jadev03/HR-Management-System"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-700 transition hover:bg-slate-200 hover:text-slate-900"
+                        aria-label="Open HR Management System repository"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.72.08-.72 1.2.08 1.83 1.24 1.83 1.24 1.08 1.83 2.82 1.3 3.5 1 .1-.77.42-1.3.76-1.6-2.66-.3-5.46-1.33-5.46-5.93 0-1.3.47-2.37 1.24-3.2-.12-.3-.54-1.53.12-3.2 0 0 1-.32 3.3 1.22a11.43 11.43 0 0 1 6 0c2.3-1.54 3.3-1.22 3.3-1.22.66 1.67.24 2.9.12 3.2.77.83 1.24 1.9 1.24 3.2 0 4.62-2.8 5.62-5.47 5.92.43.37.82 1.1.82 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5z" />
+                        </svg>
+                      </a>
+                    </div>
                   </div>
                   <p className="mt-2 text-sm text-slate-700">
                     An HR project centered on workforce operations,
                     combining employee records, profile workflows, leave
                     management, and integrated backend services on a relational
-                    data model, with Docker-based containerization and CI/CD
+                    data model, with Docker based containerization and CI/CD
                     automation for consistent delivery.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
