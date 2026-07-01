@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sathiendra Thabendra | Portfolio",
+  title: "Thabendra Sathiendra | Portfolio",
   description:
-    "Personal portfolio of Sathiendra Thabendra, Computer Science and Engineering undergraduate at the University of Moratuwa.",
+    "Personal portfolio of Thabendra Sathiendra, Computer Science and Engineering undergraduate at the University of Moratuwa.",
   icons: {
     icon: "/portfolio-icon.svg",
     shortcut: "/portfolio-icon.svg",

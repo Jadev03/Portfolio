@@ -117,7 +117,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-5 py-3 sm:px-7 md:px-10">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="text-sm font-semibold tracking-wide text-slate-900">
-              Sathiendra Thabendra
+              Thabendra Sathiendra
             </p>
 
             <nav className="flex flex-wrap items-center gap-2">
@@ -163,7 +163,7 @@ export default function Home() {
           <div className="grid items-start gap-8 md:grid-cols-[1.4fr_1fr] md:gap-10">
             <div className="space-y-6">
               <h1 className="max-w-3xl text-3xl font-bold leading-tight text-slate-900 sm:text-4xl md:text-5xl">
-                Sathiendra Thabendra
+                Thabendra Sathiendra
               </h1>
 
               <div className="space-y-2 text-slate-700">
@@ -192,13 +192,13 @@ export default function Home() {
             <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
               <img
                 src="/project-images/Portfolio%20image.png"
-                alt="Sathiendra Thabendra profile"
+                alt="Thabendra Sathiendra profile"
                 className="h-64 w-full rounded-2xl bg-slate-100 object-contain object-top scale-105"
               />
 
               <div className="mt-5 space-y-3 text-sm">
                 <p className="text-base font-semibold text-slate-900">
-                  Sathiendra Thabendra
+                  Thabendra Sathiendra
                 </p>
                 <ul className="space-y-3 text-slate-800">
                   <li className="flex items-center gap-3">
